@@ -1,0 +1,349 @@
+bench Forward Engineering
+
+SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0;
+SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0;
+SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='TRADITIONAL,ALLOW_INVALID_DATES';
+
+-- -----------------------------------------------------
+-- Schema PROYECTO_POO
+-- -----------------------------------------------------
+
+-- -----------------------------------------------------
+-- Schema PROYECTO_POO
+-- -----------------------------------------------------
+CREATE SCHEMA IF NOT EXISTS `PROYECTO_POO` DEFAULT CHARACTER SET utf8 ;
+USE `PROYECTO_POO` ;
+
+-- -----------------------------------------------------
+-- Table `PROYECTO_POO`.`Abono_Cliente`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `PROYECTO_POO`.`Abono_Cliente` (
+  `idAbono_Cliente` INT NOT NULL,
+  `Fecha` DATE NOT NULL,
+  `Valor_Total` INT NOT NULL,
+  `Cuotas_Cantidad` INT NOT NULL,
+  `idCC_Cliente` INT NOT NULL,
+  `idFactura Venta` INT NOT NULL,
+  PRIMARY KEY (`idAbono_Cliente`))
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `PROYECTO_POO`.`Forma de Pago Cliente`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `PROYECTO_POO`.`Forma de Pago Cliente` (
+  `idTipo_Pago` INT NOT NULL,
+  `Contado` INT NOT NULL,
+  `Tarjeta de Credito` INT NOT NULL,
+  `idAbono_Cliente` INT NOT NULL,
+  `IdFactura Venta` DATE NOT NULL,
+  PRIMARY KEY (`idTipo_Pago`),
+  INDEX `idAbono_Cliente_idx` (`idAbono_Cliente` ASC),
+  CONSTRAINT `idAbono_Cliente`
+    FOREIGN KEY (`idAbono_Cliente`)
+    REFERENCES `PROYECTO_POO`.`Abono_Cliente` (`idAbono_Cliente`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `PROYECTO_POO`.`Cliente`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `PROYECTO_POO`.`Cliente` (
+  `idCC_Cliente` INT NOT NULL,
+  `Nombre` VARCHAR(45) NOT NULL,
+  `Telefono` INT NOT NULL,
+  `idTipo_Pago` INT NOT NULL,
+  `idCod_Barras` INT NOT NULL,
+  `Cantidad` INT NOT NULL,
+  `idFactura Venta` INT NOT NULL,
+  PRIMARY KEY (`idCC_Cliente`),
+  INDEX `idTipo_Pago_idx` (`idTipo_Pago` ASC),
+  INDEX `idCC_Cliente_idx` (`idFactura Venta` ASC),
+  CONSTRAINT `idCC_Cliente`
+    FOREIGN KEY (`idFactura Venta`)
+    REFERENCES `PROYECTO_POO`.`Factura Venta` (`idFactura Venta`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `idTipo_Pago`
+    FOREIGN KEY (`idTipo_Pago`)
+    REFERENCES `PROYECTO_POO`.`Forma de Pago Cliente` (`idTipo_Pago`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `PROYECTO_POO`.`Intercambio`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `PROYECTO_POO`.`Intercambio` (
+  `idIntercambio` INT NOT NULL,
+  `Tipo Producto` VARCHAR(45) NOT NULL,
+  `Cantidad_Prestamo` INT NOT NULL,
+  `Almacen_Aliado` VARCHAR(45) NOT NULL,
+  `Fecha_Prestamo` DATE NOT NULL,
+  PRIMARY KEY (`idIntercambio`))
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `PROYECTO_POO`.`Detalle Producto Venta`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `PROYECTO_POO`.`Detalle Producto Venta` (
+  `idDetalle Producto Venta` INT NOT NULL,
+  `Tipo Producto` VARCHAR(45) NOT NULL,
+  `Material` VARCHAR(45) NOT NULL,
+  `Talla` INT NOT NULL,
+  `Color` VARCHAR(45) NOT NULL,
+  `Existencias` INT NOT NULL,
+  `idIntercambio` INT NOT NULL,
+  PRIMARY KEY (`idDetalle Producto Venta`),
+  INDEX `Intercambio_idx` (`idIntercambio` ASC),
+  CONSTRAINT `Intercambio`
+    FOREIGN KEY (`idIntercambio`)
+    REFERENCES `PROYECTO_POO`.`Intercambio` (`idIntercambio`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `PROYECTO_POO`.`Producto`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `PROYECTO_POO`.`Producto` (
+  `idCod_Barras` INT NOT NULL,
+  `Detalle_Producto` INT NOT NULL,
+  `IdFactura Venta` DATE NOT NULL,
+  PRIMARY KEY (`idCod_Barras`),
+  INDEX `Detalle_Producto_idx` (`Detalle_Producto` ASC),
+  CONSTRAINT `Detalle_Producto`
+    FOREIGN KEY (`Detalle_Producto`)
+    REFERENCES `PROYECTO_POO`.`Detalle Producto Venta` (`idDetalle Producto Venta`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `PROYECTO_POO`.`Factura Venta`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `PROYECTO_POO`.`Factura Venta` (
+  `idFactura Venta` INT NOT NULL,
+  `idCC_Cliente` INT NOT NULL,
+  `idTipo_Pago` INT NOT NULL,
+  `Detalle_Producto` INT NOT NULL,
+  PRIMARY KEY (`idFactura Venta`),
+  INDEX `idFactura Venta_idx` (`idCC_Cliente` ASC),
+  INDEX `idTipo_pago_idx` (`idTipo_Pago` ASC),
+  INDEX `Detalle_Producto_idx` (`Detalle_Producto` ASC),
+  CONSTRAINT `idFactura Venta`
+    FOREIGN KEY (`idCC_Cliente`)
+    REFERENCES `PROYECTO_POO`.`Cliente` (`idCC_Cliente`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `idTipo_pago`
+    FOREIGN KEY (`idTipo_Pago`)
+    REFERENCES `PROYECTO_POO`.`Forma de Pago Cliente` (`idTipo_Pago`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `Detalle_Producto`
+    FOREIGN KEY (`Detalle_Producto`)
+    REFERENCES `PROYECTO_POO`.`Producto` (`idCod_Barras`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `Detalle_producto`
+    FOREIGN KEY (`Detalle_Producto`)
+    REFERENCES `PROYECTO_POO`.`Detalle Producto Venta` (`idDetalle Producto Venta`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `PROYECTO_POO`.`Vendedor`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `PROYECTO_POO`.`Vendedor` (
+  `idCC_Vendedor` INT NOT NULL,
+  `Nombre` VARCHAR(45) NOT NULL,
+  `Apellido` VARCHAR(45) NOT NULL,
+  `Telefono` INT NOT NULL,
+  `Ventas_Realizadas` INT NOT NULL,
+  `Salario` INT NOT NULL,
+  `Comision` INT NOT NULL,
+  `idCC_Cliente` INT NOT NULL,
+  `idFactura Ventas` INT NOT NULL,
+  PRIMARY KEY (`idCC_Vendedor`),
+  INDEX `idCC_Cliente_idx` (`idCC_Cliente` ASC),
+  INDEX `idFactura Ventas_idx` (`idFactura Ventas` ASC),
+  CONSTRAINT `idCC_Cliente`
+    FOREIGN KEY (`idCC_Cliente`)
+    REFERENCES `PROYECTO_POO`.`Cliente` (`idCC_Cliente`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `idFactura Ventas`
+    FOREIGN KEY (`idFactura Ventas`)
+    REFERENCES `PROYECTO_POO`.`Factura Venta` (`idFactura Venta`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `PROYECTO_POO`.`Abono Proveedor`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `PROYECTO_POO`.`Abono Proveedor` (
+  `idAbono Proveedor` INT NOT NULL,
+  `Fecha_Abono` DATE NOT NULL,
+  `Valor` INT NOT NULL,
+  `Cuotas_Cantidad` INT NOT NULL,
+  `idNit_Proveedor` INT NOT NULL,
+  `idFactura Compra` INT NOT NULL,
+  PRIMARY KEY (`idAbono Proveedor`))
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `PROYECTO_POO`.`Forma de Pago Proveedor`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `PROYECTO_POO`.`Forma de Pago Proveedor` (
+  `idTipo_Pago` INT NOT NULL,
+  `Contado` INT NOT NULL,
+  `Tarjeta de Credito` INT NOT NULL,
+  `idAbono Proveedor` INT NOT NULL,
+  `idFactura Compra` INT NOT NULL,
+  PRIMARY KEY (`idTipo_Pago`),
+  INDEX `idAbono Proveedor_idx` (`idAbono Proveedor` ASC),
+  INDEX `idFactura Compra_idx` (`idFactura Compra` ASC),
+  CONSTRAINT `idAbono Proveedor`
+    FOREIGN KEY (`idAbono Proveedor`)
+    REFERENCES `PROYECTO_POO`.`Abono Proveedor` (`idAbono Proveedor`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `idFactura Compra`
+    FOREIGN KEY (`idFactura Compra`)
+    REFERENCES `PROYECTO_POO`.`Factura Compra` (`idFactura Compra`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `PROYECTO_POO`.`Devoluciones`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `PROYECTO_POO`.`Devoluciones` (
+  `idCod_Devoluciones` INT NOT NULL,
+  `IdFecha Venta` DATE NOT NULL,
+  `idProducto` INT NOT NULL,
+  `idCC_Cliente` INT NOT NULL,
+  PRIMARY KEY (`idCod_Devoluciones`))
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `PROYECTO_POO`.`Detalle Producto Proveedor`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `PROYECTO_POO`.`Detalle Producto Proveedor` (
+  `idDetalle Producto Proveedor` INT NOT NULL,
+  `Tipo` VARCHAR(45) NOT NULL,
+  `Material` VARCHAR(45) NOT NULL,
+  `Talla` INT NOT NULL,
+  `Color` VARCHAR(45) NOT NULL,
+  `Cantidad Total` INT NOT NULL,
+  `Cod_Devolucion` INT NOT NULL,
+  PRIMARY KEY (`idDetalle Producto Proveedor`),
+  INDEX `Cod_Devoluciones_idx` (`Cod_Devolucion` ASC),
+  CONSTRAINT `Cod_Devoluciones`
+    FOREIGN KEY (`Cod_Devolucion`)
+    REFERENCES `PROYECTO_POO`.`Devoluciones` (`idCod_Devoluciones`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `PROYECTO_POO`.`Factura Compra`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `PROYECTO_POO`.`Factura Compra` (
+  `idFactura Compra` INT NOT NULL,
+  `idAlmacen` INT NOT NULL,
+  `idTipo_Pago` INT NOT NULL,
+  `Valor_Compra` INT NOT NULL,
+  `Iva` INT NOT NULL,
+  `Fecha_Factura` DATE NOT NULL,
+  `idDetalle_Producto` INT NOT NULL,
+  PRIMARY KEY (`idFactura Compra`),
+  INDEX `idTipo_Pago_idx` (`idTipo_Pago` ASC),
+  INDEX `idDetalle_Producto_idx` (`idDetalle_Producto` ASC),
+  CONSTRAINT `idTipo_Pago`
+    FOREIGN KEY (`idTipo_Pago`)
+    REFERENCES `PROYECTO_POO`.`Forma de Pago Proveedor` (`idTipo_Pago`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `idDetalle_Producto`
+    FOREIGN KEY (`idDetalle_Producto`)
+    REFERENCES `PROYECTO_POO`.`Detalle Producto Proveedor` (`idDetalle Producto Proveedor`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `PROYECTO_POO`.`Proveedor`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `PROYECTO_POO`.`Proveedor` (
+  `idNit_Proveedor` INT NOT NULL,
+  `Nombre` VARCHAR(45) NOT NULL,
+  `idProducto` INT NOT NULL,
+  `idFactura Compra` INT NOT NULL,
+  `Tipo_Pago` INT NOT NULL,
+  PRIMARY KEY (`idNit_Proveedor`),
+  INDEX `idFactura Compra_idx` (`idFactura Compra` ASC),
+  INDEX `Tipo_Pago_idx` (`Tipo_Pago` ASC),
+  CONSTRAINT `idFactura Compra`
+    FOREIGN KEY (`idFactura Compra`)
+    REFERENCES `PROYECTO_POO`.`Factura Compra` (`idFactura Compra`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `Tipo_Pago`
+    FOREIGN KEY (`Tipo_Pago`)
+    REFERENCES `PROYECTO_POO`.`Forma de Pago Proveedor` (`idTipo_Pago`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `PROYECTO_POO`.`Almacen`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `PROYECTO_POO`.`Almacen` (
+  `idNit_Almacen` INT NOT NULL,
+  `Nombre_Almacen` VARCHAR(45) NOT NULL,
+  `Nit_proveedor` INT NOT NULL,
+  `idFactura Venta` INT NOT NULL,
+  `idVendedor` INT NOT NULL,
+  PRIMARY KEY (`idNit_Almacen`),
+  INDEX `idFactura Venta_idx` (`idFactura Venta` ASC),
+  INDEX `idVendedor_idx` (`idVendedor` ASC),
+  INDEX `idNit_proveedor_idx` (`Nit_proveedor` ASC),
+  CONSTRAINT `idFactura Venta`
+    FOREIGN KEY (`idFactura Venta`)
+    REFERENCES `PROYECTO_POO`.`Factura Venta` (`idFactura Venta`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `idVendedor`
+    FOREIGN KEY (`idVendedor`)
+    REFERENCES `PROYECTO_POO`.`Vendedor` (`idCC_Vendedor`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `idNit_proveedor`
+    FOREIGN KEY (`Nit_proveedor`)
+    REFERENCES `PROYECTO_POO`.`Proveedor` (`idNit_Proveedor`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+SET SQL_MODE=@OLD_SQL_MODE;
+SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
+SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
